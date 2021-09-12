@@ -1,0 +1,166 @@
+---
+title: "Homework 2" 
+author: "Almog and Tomer" 
+date: "3/23/2021" 
+output: html_document
+---
+
+# Homework 2
+
+### Instructions
+
+1.  All assignments are individual!
+2.  This assignment should be uploaded as two files: "rmd" and "html" (after knit) before 7/4/2021, 23:59.
+3.  There are 7 questions in this assignment, if you want to pass it you must code all 7 of them.
+4.  Questions about the assignment should be asked using the Assignments forums.
+5.  Because this is and advanced course, questions about compilation and installment of R and libraries will not be answered! (Look it up in Google)
+6.  This you should copy the code from this assignment and create an .rmd file to work with.
+7.  All of the instructions of this assignment should be included in the final .html file.
+8.  Further instructions are available on Moodle.
+
+In this assignment we will review traffic `accidents` dataset. The data includes records of traffic accidents in Edinburgh. The **goal** of this exercise is to visualize, and based on the visualization further understand the data you will be working with. For this assignment, you will need to have `dsbox` library installed. The link for the library can be found here: <https://github.com/rstudio-education/dsbox>
+
+```{r}
+# install.packages("devtools")
+devtools::install_github("rstudio-education/dsbox")
+```
+
+```{r}
+library(tidyverse)
+library(dsbox)
+```
+
+## Exercises
+
+In the following exercises do [**NOT**]{.ul}hardcoded the answers, i.e. use the proper functions to extract the relevant information and print it accordingly.
+
+#### Q1(5%)
+
+Print how many records of accidents the `accidents` dataset contains.
+
+## [Answer 1:]{.ul}
+
+I will use nrow function the get the number of records in the data frame
+
+```{r}
+nrow(accidents)
+```
+
+#### Q2(10%)
+
+The following question should be extracted by code, but typed as a text (in the RMD file) and not as chunk (i.e code or comment on the code). Please describe in one sentence each one of the data types that exist in the dataset.
+
+## [Answer 2:]{.ul}
+
+The data types we can see in this data set are:
+
+1.  [chr]{.ul} - consists letters or words for representing strings to the categories: ID, date, junction details, junctions control, second road class, second road number, ped cross human, ped cross physical and if police were involved.
+2.  [dbl]{.ul} - numeric data type that consists numbers.We use it to represent the categories: id, easting, northing, longitude, latitude, police force, vehicles involved and casualties.
+3.  [fct]{.ul} - used to group variables into fixed number of unique categories or levels. In the data set we use it for representing a factor to the categories of: severity, day of the week, first road class,road type, light. weather. road surface, special condition and hazard
+4.  [time]{.ul} - representing the time of the accidents
+
+We can classify the data types to numerical variables for continuous or discrete numbers, and categorical variables for string and ordinal variables that represent fct data type.
+
+#### Q3(25%)
+
+In the two following chunks, create: 1. Histogram plot. 2. Density plot. The plots should show the number of accidents throughout the day, and have 3 different lines based on severity (hint: explore the `position` argument). All plots should include title, proper labels, and bins which are informative enough. The plots should have a color different than the default one.
+
+## [**answer 3:**]{.ul}
+
+first of all, I will plot the histogram plot:
+
+#### [1. Histogram plot:]{.ul}
+
+I will split the bins by the sevirity with position dodge to get more clear visualization of the data.
+
+```{r}
+accidents
+```
+
+```{r}
+ggplot(accidents, aes(x = time, fill = severity)) +
+  geom_histogram(position = "dodge",binwidth = 10000) + 
+  labs(y = "Number of accidents", x = "Hour of the day", title = "Histogram of number of accidents throughout the day") +
+scale_fill_manual(values=c("#FC4E07","#E7B800","#52854C"))
+# Histogram plot
+```
+
+Secondly, I will plot the density plot:
+
+#### [2. Density plot:]{.ul}
+
+```{r}
+ggplot(accidents, aes(x = time,fill = severity)) +
+  geom_density(alpha = 0.4) + 
+  labs(y = "Density", x = "Hour of the day", title = "Density plot of accident's severity throughout the day", fill = "Severity") +
+  scale_fill_manual(values=c("#FC4E07","#E7B800","#52854C"))
+
+
+# Density plot
+```
+
+#### Q4(5%)
+
+Please explain in your words. what is the difference between `density` and `histogram` plot?
+
+## [**Answer 4:**]{.ul}
+
+The histogram groups numerical data into bins that represent the distribution of the data. It displays a quantitative distribution by showing the quantity of the values.
+
+The density plot plots the graph on continuous interval where the y axes is the percentage of the values.
+
+The difference is that the histogram is built from bins at a chosen size and a y axes that represent the quantities of the x axes values. whereas the density plot is continuous and the y axes represent the percentage of the x axes values.
+
+#### Q5(10%)
+
+Recreate the density plot from Q3, this time create one subplot for weekdays and one subplot for weekends. Make sure both subplots are printed together.
+
+## [answer 5:]{.ul}
+
+first of all, I created a data frame with the specific variables I needed, and I added a column to represent the weekend's days.
+
+```{r}
+accidents_weekends <- accidents %>%
+  mutate(weekend = case_when(day_of_week == "Saturday"~"Weekend" ,day_of_week == "Sunday"~"Weekend",day_of_week == "Monday"~"Regular day",day_of_week == "Friday"~"Regular day",day_of_week == "Wednesday"~"Regular day",day_of_week == "Tuesday"~"Regular day",day_of_week == "Thursday"~"Regular day"))
+```
+
+Secondly, I created the two sub plots that one represent the accidents during weekend and the other of a regular day.
+
+```{r}
+ggplot(accidents_weekends, aes(x = time, fill = severity)) +
+  geom_density(alpha = 0.4) + 
+  labs(y = "Density", x = "Hour of the day", title = "Two density subplots of accident's severity throughout the day", subtitle = "compared bewtween weekend to regular day", fill = "Severity") +
+facet_wrap(~weekend,nrow = 2) +
+  scale_fill_manual(values=c("#FC4E07","#E7B800","#52854C"))
+# Two density plots
+```
+
+In Questions 6,7, make sure each plot uses different variables (There may be a intersect of one variable. In case there are two similar variables, it is okay only if the plots provides a different insight for the data.)
+
+#### Q6(25%)
+
+Create data visualization based on three different variables. Additional instruction: make sure the color increase / decrease the size of the points in your plot.
+
+## [answer 6:]{.ul}
+
+```{r}
+ggplot(accidents, aes(x = easting,y = northing, color = vehicles, size = vehicles)) +
+  geom_point() +
+    labs(y = "Northing", x = "Easting", title = "Plot of accidents's cordiantes", subtitle = "with number of Vehicles involved", color = "Vehicles") +
+   guides(size = FALSE)
+
+# Three variables plot, increased by color
+```
+
+#### Q7(20%)
+
+Create data visualization based on three different variables. Additional instruction: make sure the color differs on line from another.
+
+## [answer 7:]{.ul}
+
+```{r}
+ggplot(accidents_weekends, aes(x =time ,y = casualties, color = weekend)) +
+  geom_line() +
+  labs(y = "Casualties", x = "Hour", title = "Plot of accidents's casualties", subtitle = "during the day bewteen regular day to weekend", color = "Day") 
+# Three variables plot, colored lines
+```
